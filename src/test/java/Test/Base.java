@@ -8,7 +8,7 @@ import net.thucydides.core.model.TestOutcome;
 import net.thucydides.core.model.TestStep;
 import net.thucydides.core.steps.StepEventBus;
 import org.jbehave.core.annotations.AfterScenario;
-import net.thucydides.core.reports.xml.XMLTestOutcomeReporter;
+import org.jbehave.core.annotations.ScenarioType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +24,7 @@ public class Base extends SerenityStory {
     protected Boolean isSuccess = true;
 
 
+    @AfterScenario(uponType = ScenarioType.ANY)
     public void TestLinkIntegration() {
         this.testOutcome = GetTestOutcome();
 
@@ -74,16 +75,25 @@ public class Base extends SerenityStory {
         List<StepResult> stepResults =  new ArrayList<StepResult>();
 
         for(TestStep testStep : testStepList) {
-            String status = "Success";
-            if(testStep.isFailure() || testStep.isError()) {
-                status = "Failed";
-            }
-
             StepResult stepResult = new StepResult();
-            stepResult.name = testStep.getDescription();
-            stepResult.status = status;
 
-            stepResults.add(stepResult);
+            if(testStep.hasChildren() && testStep.getChildren().size() > 1) {
+                List<TestStep> stepChildrens = testStep.getChildren();
+
+                for(TestStep stepChildren : stepChildrens) {
+                    StepResult childrenResult = new StepResult();
+
+                    childrenResult.name = stepChildren.getDescription();
+                    childrenResult.status = stepChildren.isFailure() || stepChildren.isError() ? "Failed" : "Success" ;
+
+                    stepResults.add(childrenResult);
+                }
+            } else {
+                stepResult.name = testStep.getDescription();
+                stepResult.status = testStep.isFailure() || testStep.isError() ? "Failed" : "Success";
+
+                stepResults.add(stepResult);
+            }
         }
 
         return stepResults;

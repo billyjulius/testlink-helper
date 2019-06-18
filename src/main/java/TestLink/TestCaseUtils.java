@@ -61,7 +61,7 @@ public class TestCaseUtils extends TestLinkMain{
 
     private Integer getTestCaseID(String tc_name) {
         try {
-            Integer tc_id = api.getTestCaseIDByName(tc_name, null,null,null);
+            Integer tc_id = api.getTestCaseIDByName(tc_name, null,_PROJECTNAME,null);
             return tc_id;
         } catch (TestLinkAPIException exception) {
             return 0;
