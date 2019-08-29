@@ -12,7 +12,7 @@ public class TestLinkMain {
 
     static TestLinkAPI api;
 
-    String TESTLINK_URL = "http://testlink.sepulsa.id:6969/lib/api/xmlrpc/v1/xmlrpc.php";
+    String TESTLINK_URL = "http://testlink.sepulsa.id/lib/api/xmlrpc/v1/xmlrpc.php";
     String TESTLINK_KEY = "4b13c21a5a1fd0d2c5f4333f8ad724c6";
 
     protected Integer tc_id;

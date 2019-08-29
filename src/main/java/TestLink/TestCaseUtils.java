@@ -49,6 +49,16 @@ public class TestCaseUtils extends TestLinkMain{
             );
 
             id = testCase.getId();
+        } else {
+            TestCase testCase = getTestCaseExist(id);
+
+            for(TestCaseStep step : _testCaseSteps) {
+                System.out.println("DEBUG Step Update = " + step.getActions());
+            }
+
+            testCase.setSteps(_testCaseSteps);
+            testCase.setVersion(testCase.getVersion()+1);
+            api.updateTestCase(testCase);
         }
 
         return id;
@@ -66,6 +76,10 @@ public class TestCaseUtils extends TestLinkMain{
         } catch (TestLinkAPIException exception) {
             return 0;
         }
+    }
+
+    private TestCase getTestCaseExist(Integer tc_id) {
+        return api.getTestCase(tc_id, null, null);
     }
 
     private Boolean isTestCaseExist(Integer tc_id) {
