@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class TestLinkMain {
 
-    private static TestLinkAPI api;
+    protected static TestLinkAPI api;
 
     protected String _PROJECTNAME;
     protected Integer _PROJECTID;
