@@ -8,24 +8,19 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+/**
+ *  This class is the entry for testlink flow
+ */
 public class TestLinkMain {
 
-    static TestLinkAPI api;
+    private static TestLinkAPI api;
 
-    String TESTLINK_URL = "http://testlink.sepulsa.id/lib/api/xmlrpc/v1/xmlrpc.php";
-    String TESTLINK_KEY = "4b13c21a5a1fd0d2c5f4333f8ad724c6";
-
-    protected Integer tc_id;
-    protected Integer tp_id;
-    protected Integer tc_external_id;
-    protected String full_tc_external_id;
-
-    String _PROJECTNAME = "Project Coba Integrasi";
-    Integer _PROJECTID = 1169;
-    Integer _VERSION = 1;
-    String _BUILDNAME = "Automated";
-    String _PLANNAME = "Plan 201906";
-    String _USERNAME = "billy";
+    protected String _PROJECTNAME;
+    protected Integer _PROJECTID;
+    protected Integer _VERSION;
+    protected String _BUILDNAME;
+    protected String _PLANNAME;
+    protected String _USERNAME;
 
     protected String _testname;
     protected String _testsummary;
@@ -34,49 +29,89 @@ public class TestLinkMain {
     protected ExecutionStatus _resultstatus;
     protected String _resultnotes;
 
+    protected Integer tc_id;
+    protected Integer tp_id;
+    protected Integer tc_external_id;
+    protected String full_tc_external_id;
+
+    /**
+     * No argument default constructor
+     */
     public TestLinkMain() {}
 
-    public TestLinkMain(String test_name, Boolean test_is_success, String test_error_message, List<StepResult> stepResults, Integer test_suite_id) {
+    /**
+     * Constructor with arguments to initialize testlink connection and saving required data
+     * @param testlink_url is testlink xml-rpc url location
+     * @param testlink_key is user api key for authenticate
+     */
+    public TestLinkMain(String testlink_url, String testlink_key) {
         URL url = null;
 
         try {
-            url = new URL(TESTLINK_URL);
+            url = new URL(testlink_url);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
 
-        api = new TestLinkAPI(url, TESTLINK_KEY);
+        api = new TestLinkAPI(url, testlink_key);
+    }
 
+    /**
+     * Set required testlink data for project, build, and plan
+     * @param project_name is project name
+     * @param project_id is project id seen in testlink
+     * @param version is project version (always set 1)
+     * @param build_name is build name
+     * @param plan_name is plan name
+     * @param username is username that will assigned in test
+     */
+    public void Init(String project_name, Integer project_id, Integer version, String build_name, String plan_name, String username) {
+        this._PROJECTNAME = project_name;
+        this._PROJECTID = project_id;
+        this._VERSION = version;
+        this._BUILDNAME = build_name;
+        this._PLANNAME = plan_name;
+        this._USERNAME = username;
+    }
+
+    /**
+     * Run the creation of test case and test case execution
+     * @param test_name is string for displayed test case name
+     * @param test_is_success is boolean test status
+     * @param test_error_message is error message for displayed in test case result notes (leave it empty if there is no error)
+     * @param stepResults is list of step result modeled in StepResult class
+     * @param test_suite_id is id of test suite
+     */
+    public void Run(String test_name, Boolean test_is_success, String test_error_message, List<StepResult> stepResults, Integer test_suite_id) {
         this._testname = test_name;
         this._testsummary = test_name;
         this._suiteid = test_suite_id;
         this._resultstatus = this.setExecutionStatus(test_is_success);
         this._resultnotes = test_error_message;
         this._stepResults = stepResults;
-    }
 
-    public void run() {
-        TestPlanUtils testPlanUtils = new TestPlanUtils(_PLANNAME);
+        TestPlanUtils testPlanUtils = new TestPlanUtils(_PLANNAME, _PROJECTNAME);
         tp_id = testPlanUtils.createTestPlan();
 
-        TestBuildUtils testBuildUtils = new TestBuildUtils(tp_id);
+        TestBuildUtils testBuildUtils = new TestBuildUtils(tp_id, _BUILDNAME);
         testBuildUtils.createTestBuild();
 
         TestCaseUtils testCaseUtils = new TestCaseUtils(_testname, _suiteid, _testsummary, _stepResults);
         tc_id = testCaseUtils.createTestCase();
         full_tc_external_id = testCaseUtils.getTestCaseExternalID(tc_id);
-        tc_external_id = parseFullExternalID(full_tc_external_id);
+        tc_external_id = Integer.parseInt(full_tc_external_id.split("-")[1]);
 
         assignTestCaseToTestPlan();
-
-        assigtTestCase();
-
+        assignTestCase();
         reportTestCaseResult();
 
         System.out.println("DEBUG TEST PLAN :"+ tp_id);
         System.out.println("DEBUG TEST CASE :"+ tc_id);
     }
 
+    /**
+     * Send test case execution report
+     */
     private void reportTestCaseResult() {
         ReportTCResultResponse result = api.reportTCResult(
                 tc_id,
@@ -95,10 +130,18 @@ public class TestLinkMain {
         );
     }
 
+    /**
+     * Assign test case to test plan
+     */
     private void assignTestCaseToTestPlan() {
         Integer id = api.addTestCaseToTestPlan(_PROJECTID, tp_id, tc_id, _VERSION, null, null, null);
     }
 
+    /**
+     * Set execution status for test case execution
+     * @param status is status of test case run in test tools
+     * @return ExecutionStatus enum
+     */
     private ExecutionStatus setExecutionStatus(Boolean status) {
         if(status) {
             return ExecutionStatus.PASSED;
@@ -107,11 +150,10 @@ public class TestLinkMain {
         }
     }
 
-    private Integer parseFullExternalID(String full_external) {
-        return Integer.parseInt(full_external.split("-")[1]);
-    }
-
-    private void assigtTestCase() {
+    /**
+     * Assign username to test case
+     */
+    private void assignTestCase() {
         api.assignTestCaseExecutionTask(tp_id, full_tc_external_id, _USERNAME, "Automated");
     }
 }

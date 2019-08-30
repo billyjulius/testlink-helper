@@ -9,16 +9,26 @@ import br.eti.kinoshita.testlinkjavaapi.util.TestLinkAPIException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class that hold method for test case creation flow
+ */
 public class TestCaseUtils extends TestLinkMain{
 
-    protected String _TESTNAME;
+    private String _TESTNAME;
 
-    protected Integer _SUITEID;
+    private Integer _SUITEID;
 
-    protected String _SUMMARY;
+    private String _SUMMARY;
 
-    protected List<TestCaseStep> _testCaseSteps;
+    private List<TestCaseStep> _testCaseSteps;
 
+    /**
+     * Class constructor with argument for set required data for test case creation
+     * @param test_name is test name
+     * @param suite_id is id of test suite
+     * @param summary is summary of test case
+     * @param stepResults is list of step result modeled in StepResult class
+     */
     public TestCaseUtils(String test_name, Integer suite_id, String summary, List<StepResult> stepResults){
         this. _TESTNAME = test_name;
         this._SUITEID = suite_id;
@@ -27,10 +37,14 @@ public class TestCaseUtils extends TestLinkMain{
         this._testCaseSteps = setTestStep(stepResults);
     }
 
+    /**
+     * Create test case or get existing test case
+     * @return a <code>integer</code> of created or existing test case ID
+     */
     public Integer createTestCase() {
         Integer id = getTestCaseID(_TESTNAME);
 
-        if(!isTestCaseExist(id)) {
+        if(id != 0) {
             TestCase testCase = api.createTestCase(
                     _TESTNAME,
                     _SUITEID,
@@ -64,11 +78,21 @@ public class TestCaseUtils extends TestLinkMain{
         return id;
     }
 
-    public String getTestCaseExternalID(Integer tp_id) {
-        TestCase test_case = api.getTestCase(tp_id, null, null);
+    /**
+     * Get test case full external Id
+     * @param tc_id is test case Id
+     * @return a <code>string</code> of the full external Id, composed by the prefix + externalId
+     */
+    public String getTestCaseExternalID(Integer tc_id) {
+        TestCase test_case = api.getTestCase(tc_id, null, null);
         return test_case.getFullExternalId();
     }
 
+    /**
+     * Get test case Id with given test case name
+     * @param tc_name is test case name
+     * @return a <code>integer</code> of test case Id with return 0 if test case not found.
+     */
     private Integer getTestCaseID(String tc_name) {
         try {
             Integer tc_id = api.getTestCaseIDByName(tc_name, null,_PROJECTNAME,null);
@@ -78,14 +102,20 @@ public class TestCaseUtils extends TestLinkMain{
         }
     }
 
+    /**
+     * Get existing test case with give test case Id
+     * @param tc_id is test case Id
+     * @return a <code>TestCase</code> class containing existing test case information
+     */
     private TestCase getTestCaseExist(Integer tc_id) {
         return api.getTestCase(tc_id, null, null);
     }
 
-    private Boolean isTestCaseExist(Integer tc_id) {
-        return tc_id != 0;
-    }
-
+    /**
+     * Set step result to TestCaseStep class model
+     * @param stepResults is list of StepResult class
+     * @return list of TestCaseStep class
+     */
     private List<TestCaseStep> setTestStep(List<StepResult> stepResults) {
         List<TestCaseStep> steps = new ArrayList<TestCaseStep>();
 
