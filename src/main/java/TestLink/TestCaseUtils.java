@@ -65,11 +65,6 @@ public class TestCaseUtils extends TestLinkMain{
             id = testCase.getId();
         } else {
             TestCase testCase = getTestCaseExist(id);
-
-            for(TestCaseStep step : _testCaseSteps) {
-                System.out.println("DEBUG Step Update = " + step.getActions());
-            }
-
             testCase.setSteps(_testCaseSteps);
             testCase.setVersion(testCase.getVersion()+1);
             api.updateTestCase(testCase);
