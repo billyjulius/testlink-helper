@@ -6,7 +6,7 @@
 
     <groupId>com.github.billyjulius</groupId>
     <artifactId>testlink-helper</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -45,6 +45,12 @@
         <developer>
             <name>Billy Julius</name>
             <email>billyjulius49@gmail.com</email>
+        </developer>
+        <developer>
+            <name>Moh. Iskandar Maulana</name>
+            <email>iskandar@alterra.id</email>
+            <organization>Alterra</organization>
+            <organizationUrl>https://www.alterra.id/</organizationUrl>
         </developer>
     </developers>
     <dependencies>

@@ -16,7 +16,7 @@ TestLinkMain.java
 ```java
 TestLinkMain testLinkMain = new TestLinkMain(TESTLINK_XMLRPC_URL, TESTLINK_USER_KEY);
 testLinkMain.Init(PROJECT_NAME, PROJECT_ID, VERSION, BUILD_NAME, PLAN_NAME, USERNAME)
-testLinkMain.run(TESTCASE_NAME, TEST_IS_SUCCESS, ERROR_MESSAGE, STEP_RESULTS, SUITE_ID);
+testLinkMain.Run(TESTCASE_NAME, TEST_IS_SUCCESS, ERROR_MESSAGE, STEP_RESULTS, SUITE_ID);
 ```
 
 To send step result to TestLink with Testlink Helper, you need to send it with class StepResult.java

@@ -64,10 +64,23 @@ public class TestCaseUtils extends TestLinkMain{
 
             id = testCase.getId();
         } else {
-            TestCase testCase = getTestCaseExist(id);
-            testCase.setSteps(_testCaseSteps);
-            testCase.setVersion(testCase.getVersion()+1);
-            api.updateTestCase(testCase);
+            TestCase testCase = api.createTestCase(
+                    _TESTNAME,
+                    _SUITEID,
+                    _PROJECTID,
+                    "admin",
+                    _SUMMARY,
+                    _testCaseSteps,
+                    null,
+                    null,
+                    null,
+                    ExecutionType.AUTOMATED,
+                    null,
+                    null,
+                    true,
+                    ActionOnDuplicate.CREATE_NEW_VERSION
+            );
+            id = testCase.getId();
         }
 
         return id;
