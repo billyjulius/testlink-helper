@@ -20,6 +20,10 @@ public class TestCaseUtils extends TestLinkMain{
 
     private String _SUMMARY;
 
+    private Integer _PROJECT_ID;
+
+    private String _PROJECT_NAME;
+
     private List<TestCaseStep> _testCaseSteps;
 
     /**
@@ -29,7 +33,9 @@ public class TestCaseUtils extends TestLinkMain{
      * @param summary is summary of test case
      * @param stepResults is list of step result modeled in StepResult class
      */
-    public TestCaseUtils(String test_name, Integer suite_id, String summary, List<StepResult> stepResults){
+    public TestCaseUtils(Integer project_id, String project_name, String test_name, Integer suite_id, String summary, List<StepResult> stepResults){
+        this._PROJECT_ID = project_id;
+        this._PROJECT_NAME = project_name;
         this. _TESTNAME = test_name;
         this._SUITEID = suite_id;
         this._SUMMARY = summary;
@@ -44,11 +50,11 @@ public class TestCaseUtils extends TestLinkMain{
     public Integer createTestCase() {
         Integer id = getTestCaseID(_TESTNAME);
 
-        if(id != 0) {
+        if(id == 0) {
             TestCase testCase = api.createTestCase(
                     _TESTNAME,
                     _SUITEID,
-                    _PROJECTID,
+                    _PROJECT_ID,
                     "admin",
                     _SUMMARY,
                     _testCaseSteps,
@@ -67,7 +73,7 @@ public class TestCaseUtils extends TestLinkMain{
             TestCase testCase = api.createTestCase(
                     _TESTNAME,
                     _SUITEID,
-                    _PROJECTID,
+                    _PROJECT_ID,
                     "admin",
                     _SUMMARY,
                     _testCaseSteps,
@@ -103,7 +109,7 @@ public class TestCaseUtils extends TestLinkMain{
      */
     private Integer getTestCaseID(String tc_name) {
         try {
-            Integer tc_id = api.getTestCaseIDByName(tc_name, null,_PROJECTNAME,null);
+            Integer tc_id = api.getTestCaseIDByName(tc_name, null,_PROJECT_NAME,null);
             return tc_id;
         } catch (TestLinkAPIException exception) {
             return 0;

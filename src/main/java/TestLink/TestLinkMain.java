@@ -96,7 +96,7 @@ public class TestLinkMain {
         TestBuildUtils testBuildUtils = new TestBuildUtils(tp_id, _BUILDNAME);
         testBuildUtils.createTestBuild();
 
-        TestCaseUtils testCaseUtils = new TestCaseUtils(_testname, _suiteid, _testsummary, _stepResults);
+        TestCaseUtils testCaseUtils = new TestCaseUtils(_PROJECTID, _PROJECTNAME, _testname, _suiteid, _testsummary, _stepResults);
         tc_id = testCaseUtils.createTestCase();
         full_tc_external_id = testCaseUtils.getTestCaseExternalID(tc_id);
         tc_external_id = Integer.parseInt(full_tc_external_id.split("-")[1]);
@@ -154,6 +154,6 @@ public class TestLinkMain {
      * Assign username to test case
      */
     private void assignTestCase() {
-        api.assignTestCaseExecutionTask(tp_id, full_tc_external_id, _USERNAME, "Automated");
+        api.assignTestCaseExecutionTask(tp_id, full_tc_external_id, _USERNAME, _BUILDNAME);
     }
 }
