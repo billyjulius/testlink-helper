@@ -172,7 +172,6 @@ public class TestLinkMain {
             TestCaseStepResult testCaseStepResult = new TestCaseStepResult();
             testCaseStepResult.setNumber(number);
             testCaseStepResult.setResult(executionStatus);
-            testCaseStepResult.setNotes("Step notes "+number);
             results.add(testCaseStepResult);
             number++;
         }
