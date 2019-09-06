@@ -28,7 +28,7 @@ public class TestPlanUtils extends TestLinkMain{
     public Integer createTestPlan() {
         Integer tp_id = getTestPlanID(plan_name);
 
-        if(tp_id == 0) {
+        if(tp_id.equals(0)) {
             TestPlan test_plan = api.createTestPlan(plan_name, project_name, null, true, true);
             tp_id = test_plan.getId();
         };

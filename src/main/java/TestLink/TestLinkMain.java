@@ -3,9 +3,11 @@ package TestLink;
 import br.eti.kinoshita.testlinkjavaapi.TestLinkAPI;
 import br.eti.kinoshita.testlinkjavaapi.constants.ExecutionStatus;
 import br.eti.kinoshita.testlinkjavaapi.model.ReportTCResultResponse;
+import br.eti.kinoshita.testlinkjavaapi.model.TestCaseStepResult;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,9 +30,11 @@ public class TestLinkMain {
     protected Integer _suiteid;
     protected ExecutionStatus _resultstatus;
     protected String _resultnotes;
+    protected List<TestCaseStepResult> testCaseStepResults;
 
     protected Integer tc_id;
     protected Integer tp_id;
+    protected Integer tb_id;
     protected Integer tc_external_id;
     protected String full_tc_external_id;
 
@@ -94,12 +98,13 @@ public class TestLinkMain {
         tp_id = testPlanUtils.createTestPlan();
 
         TestBuildUtils testBuildUtils = new TestBuildUtils(tp_id, _BUILDNAME);
-        testBuildUtils.createTestBuild();
+        tb_id = testBuildUtils.createTestBuild();
 
         TestCaseUtils testCaseUtils = new TestCaseUtils(_PROJECTID, _PROJECTNAME, _testname, _suiteid, _testsummary, _stepResults);
         tc_id = testCaseUtils.createTestCase();
         full_tc_external_id = testCaseUtils.getTestCaseExternalID(tc_id);
         tc_external_id = Integer.parseInt(full_tc_external_id.split("-")[1]);
+        testCaseStepResults = setStepResult(_stepResults);
 
         assignTestCaseToTestPlan();
         assignTestCase();
@@ -118,15 +123,19 @@ public class TestLinkMain {
                 tc_external_id,
                 tp_id,
                 _resultstatus,
-                null,
+                testCaseStepResults,
+                tb_id,
                 _BUILDNAME,
                 _resultnotes,
+                1,
+                null,
+                null,
+                null,
+                null,
+                null,
                 false,
                 null,
-                null,
-                null,
-                null,
-                false
+                null
         );
     }
 
@@ -148,6 +157,26 @@ public class TestLinkMain {
         } else {
             return ExecutionStatus.FAILED;
         }
+    }
+
+    private List<TestCaseStepResult> setStepResult(List<StepResult> stepResults) {
+        List<TestCaseStepResult> results = new ArrayList();
+
+        Integer number = 1;
+        for (StepResult stepResult : stepResults) {
+            ExecutionStatus executionStatus = ExecutionStatus.PASSED;
+            if(stepResult.getStatus().equalsIgnoreCase("failed") || stepResult.getStatus().equalsIgnoreCase("fail") || stepResult.getStatus().equals(false)) {
+                executionStatus = ExecutionStatus.FAILED;
+            }
+
+            TestCaseStepResult testCaseStepResult = new TestCaseStepResult();
+            testCaseStepResult.setNumber(number);
+            testCaseStepResult.setResult(executionStatus);
+            testCaseStepResult.setNotes("Step notes "+number);
+            results.add(testCaseStepResult);
+            number++;
+        }
+        return results;
     }
 
     /**
