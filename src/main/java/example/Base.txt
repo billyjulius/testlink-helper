@@ -1,4 +1,4 @@
-package test;
+package Test;
 
 
 import net.serenitybdd.jbehave.SerenityStory;
@@ -23,18 +23,17 @@ public class Base extends SerenityStory {
     protected TestOutcome testOutcome;
     protected String errorMessage;
     protected Boolean isSuccess = true;
-    protected Boolean isGivenStoriesType = false;
     protected List<String> exampleValues = new ArrayList<>();
 
-    String TESTLINK_URL = "http://testlink.sepulsa.id/lib/api/xmlrpc/v1/xmlrpc.php";
-    String TESTLINK_KEY = "4b13c21a5a1fd0d2c5f4333f8ad724c6";
+    String TESTLINK_URL = "";
+    String TESTLINK_KEY = "";
 
-    String _PROJECTNAME = "Project Coba Integrasi";
+    String _PROJECTNAME = "";
     Integer _PROJECTID = 1169;
     Integer _VERSION = 1;
     String _BUILDNAME = "Automated";
-    String _PLANNAME = "Plan 201909";
-    String _USERNAME = "billy";
+    String _PLANNAME = "";
+    String _USERNAME = "";
     String _TCSUMMARY = "";
 
     @AfterScenario(uponType = ScenarioType.ANY)
@@ -60,9 +59,11 @@ public class Base extends SerenityStory {
         for (StepResult stepResult : stepResults) {
             System.out.println("DEBUG TEST STEP NAME : " + stepResult.getName() + " ("+ stepResult.getStatus() +")"); }
 
-         TestLinkMain testLinkMain = new TestLinkMain(TESTLINK_URL, TESTLINK_KEY);
-         testLinkMain.Init(_PROJECTNAME, _PROJECTID, _VERSION, _BUILDNAME, _PLANNAME, _USERNAME);
-         testLinkMain.Run(TestCaseName, _TCSUMMARY, this.isSuccess, this.errorMessage, stepResults, SuiteID);
+        TestLinkMain testLinkMain = new TestLinkMain(TESTLINK_URL, TESTLINK_KEY);
+        testLinkMain.Init(_PROJECTNAME, _PROJECTID, _VERSION, _BUILDNAME, _PLANNAME, _USERNAME);
+        if(stepResults.size() > 0) {
+            testLinkMain.Run(TestCaseName, _TCSUMMARY, this.isSuccess, this.errorMessage, stepResults, SuiteID);
+        }
     }
 
     private TestOutcome GetTestOutcome() {
@@ -91,9 +92,9 @@ public class Base extends SerenityStory {
         for(TestStep testStep : testStepList) {
 
             /*
-            * Kalo ga punya childern - pass
-            * Kalo punya children dan description ada pattern Example #\d+ - pass
-            * Kalo puunya children dan description ga punya pattern Example #\d+ - abort
+             * Kalo ga punya childern - pass
+             * Kalo punya children dan description ada pattern Example #\d+ - pass
+             * Kalo puunya children dan description ga punya pattern Example #\d+ - abort
              */
 
             Boolean exampleStories = testStep.getDescription().toString().matches("(.*)Example #\\d+(.*)");
@@ -127,6 +128,7 @@ public class Base extends SerenityStory {
             }
 
             if(testStep.getChildren().size() == 0 && !exampleStories) {
+                _TCSUMMARY = this.testOutcome.getName();
                 StepResult stepResult = new StepResult();
                 stepResult.name = testStep.getDescription();
                 stepResult.status = testStep.isFailure() || testStep.isError() ? "Failed" : "Success";
