@@ -28,6 +28,8 @@ public class TestCaseUtils extends TestLinkMain{
 
     /**
      * Class constructor with argument for set required data for test case creation
+     * @param project_id is project Id
+     * @param project_name is project name
      * @param test_name is test name
      * @param suite_id is id of test suite
      * @param summary is summary of test case
@@ -50,7 +52,7 @@ public class TestCaseUtils extends TestLinkMain{
     public Integer createTestCase() {
         Integer id = getTestCaseID(_TESTNAME);
 
-        if(id == 0) {
+        if(id.equals(0)) {
             TestCase testCase = api.createTestCase(
                     _TESTNAME,
                     _SUITEID,
@@ -70,23 +72,11 @@ public class TestCaseUtils extends TestLinkMain{
 
             id = testCase.getId();
         } else {
-            TestCase testCase = api.createTestCase(
-                    _TESTNAME,
-                    _SUITEID,
-                    _PROJECT_ID,
-                    "admin",
-                    _SUMMARY,
-                    _testCaseSteps,
-                    null,
-                    null,
-                    null,
-                    ExecutionType.AUTOMATED,
-                    null,
-                    null,
-                    true,
-                    ActionOnDuplicate.CREATE_NEW_VERSION
-            );
-            id = testCase.getId();
+            TestCase testCase = api.getTestCase(id, null, null);
+            testCase.setSteps(_testCaseSteps);
+            testCase.setSummary(_SUMMARY);
+
+            api.updateTestCase(testCase);
         }
 
         return id;

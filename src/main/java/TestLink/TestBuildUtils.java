@@ -23,12 +23,19 @@ public class TestBuildUtils extends TestLinkMain {
 
     /**
      * Create test build if not exist
+     * @return build Id
      */
-    public void createTestBuild() {
+    public Integer createTestBuild() {
+        Integer id = 0;
         builds = getAllTestBuild();
         if(!isGivenBuildNameExist()) {
             Build build = api.createBuild(plan_id, build_name, null);
+            id = build.getId();
+        } else {
+            id = getSpecificBuildId();
         }
+
+        return id;
     }
 
     /**
@@ -53,5 +60,22 @@ public class TestBuildUtils extends TestLinkMain {
         }
 
         return false;
+    }
+
+    /**
+     * Find build Id with designated name
+     * @return build id
+     */
+    private Integer getSpecificBuildId() {
+        Integer id = 0;
+        if(builds != null) {
+            for (Build num:builds) {
+                if(num.getName().equals(build_name)) {
+                    id = num.getId();
+                }
+            }
+        }
+
+        return id;
     }
 }
