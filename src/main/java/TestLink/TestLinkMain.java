@@ -86,9 +86,9 @@ public class TestLinkMain {
      * @param stepResults is list of step result modeled in StepResult class
      * @param test_suite_id is id of test suite
      */
-    public void Run(String test_name, Boolean test_is_success, String test_error_message, List<StepResult> stepResults, Integer test_suite_id) {
+    public void Run(String test_name, String test_summary, Boolean test_is_success, String test_error_message, List<StepResult> stepResults, Integer test_suite_id) {
         this._testname = test_name;
-        this._testsummary = test_name;
+        this._testsummary = test_summary;
         this._suiteid = test_suite_id;
         this._resultstatus = this.setExecutionStatus(test_is_success);
         this._resultnotes = test_error_message;

@@ -30,3 +30,9 @@ for(TestStep testStep : testStepList) {
     stepResults.add(stepResult);
 }
 ```
+
+### SerenityBDD
+If you using framework automation tool [SerenityBDD](http://www.serenity-bdd.info) and need to add class for running this library, 
+we provide some example in [here](src/main/java/example/Base.java). 
+
+You can copy it in your SerenityBDD project and change the coresponding variable.
