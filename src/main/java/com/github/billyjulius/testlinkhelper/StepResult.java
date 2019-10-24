@@ -1,4 +1,4 @@
-package TestLink;
+package com.github.billyjulius.testlinkhelper;
 
 /**
  * Class to hold test step result information

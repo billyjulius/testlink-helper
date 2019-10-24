@@ -1,4 +1,4 @@
-package TestLink;
+package com.github.billyjulius.testlinkhelper;
 
 import br.eti.kinoshita.testlinkjavaapi.model.Build;
 

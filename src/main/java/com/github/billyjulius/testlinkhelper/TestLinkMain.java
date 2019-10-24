@@ -1,4 +1,4 @@
-package TestLink;
+package com.github.billyjulius.testlinkhelper;
 
 import br.eti.kinoshita.testlinkjavaapi.TestLinkAPI;
 import br.eti.kinoshita.testlinkjavaapi.constants.ExecutionStatus;
@@ -159,6 +159,11 @@ public class TestLinkMain {
         }
     }
 
+    /**
+     * Set execution status per step as step result
+     * @param stepResults
+     * @return List of TestCaseStepResult
+     */
     private List<TestCaseStepResult> setStepResult(List<StepResult> stepResults) {
         List<TestCaseStepResult> results = new ArrayList();
 

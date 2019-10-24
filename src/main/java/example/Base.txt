@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import TestLink.StepResult;
-import TestLink.TestLinkMain;
+import com.github.billyjulius.testlinkhelper.StepResult;
+import com.github.billyjulius.testlinkhelper.TestLinkMain;
 
 public class Base extends SerenityStory {
 
