@@ -1,12 +1,10 @@
-package Test;
-
+package test;
 
 import net.serenitybdd.jbehave.SerenityStory;
-import net.thucydides.core.model.DataTable;
-import net.thucydides.core.model.DataTableRow;
-import net.thucydides.core.model.TestOutcome;
-import net.thucydides.core.model.TestStep;
+import net.thucydides.core.model.*;
 import net.thucydides.core.steps.StepEventBus;
+import net.thucydides.core.util.EnvironmentVariables;
+import net.thucydides.core.util.SystemEnvironmentVariables;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.ScenarioType;
 
@@ -21,48 +19,58 @@ import TestLink.TestLinkMain;
 public class Base extends SerenityStory {
 
     protected TestOutcome testOutcome;
-    protected String errorMessage;
+    protected String errorMessage = null;
     protected Boolean isSuccess = true;
     protected List<String> exampleValues = new ArrayList<>();
+    protected List<StepResult> stepResults =  new ArrayList<StepResult>();
 
-    String TESTLINK_URL = "";
-    String TESTLINK_KEY = "";
+    String TESTLINK_URL = "http://{TESLINK_HOST}/lib/api/xmlrpc/v1/xmlrpc.php";
+    String TESTLINK_KEY = "qwerty123456";
 
-    String _PROJECTNAME = "";
-    Integer _PROJECTID = 1169;
+    String _PROJECTNAME = "PROJECT NAME";
+    Integer _SUITEID;
+    Integer _PROJECTID = 1234;
     Integer _VERSION = 1;
-    String _BUILDNAME = "Automated";
-    String _PLANNAME = "";
-    String _USERNAME = "";
-    String _TCSUMMARY = "";
+    String _BUILDNAME = "BUILD NAME";
+    String _PLANNAME = "PLAN NAME";
+    String _USERNAME = "USERNAME";
+    String _TCSUMMARY = null;
 
-    @AfterScenario(uponType = ScenarioType.ANY)
+    @AfterScenario(uponType = ScenarioType.NORMAL)
     public void TestLinkIntegration() {
         this.testOutcome = GetTestOutcome();
 
-        String TestCaseName = GetTestCaseName();
+        String TestCaseName =  this.testOutcome.getName();
 
         //  Suite ID from scenario name with pattern '1234567'
-        // Integer SuiteID = ParseSuiteID(TestCaseName);
+        this._SUITEID = ParseSuiteID(TestCaseName);
 
-        //  Suite ID hardcode if necessary
-        Integer SuiteID = 2812;
-
-        System.out.println("");
-        System.out.println("<====================================>");
-        System.out.println("");
-
-        System.out.println("DEBUG TEST CASE NAME : " + TestCaseName);
-
-        List<StepResult> stepResults = GetTestResult();
-
-        for (StepResult stepResult : stepResults) {
-            System.out.println("DEBUG TEST STEP NAME : " + stepResult.getName() + " ("+ stepResult.getStatus() +")"); }
+        GetTestResult();
+        GetTestErrorMessage();
 
         TestLinkMain testLinkMain = new TestLinkMain(TESTLINK_URL, TESTLINK_KEY);
         testLinkMain.Init(_PROJECTNAME, _PROJECTID, _VERSION, _BUILDNAME, _PLANNAME, _USERNAME);
         if(stepResults.size() > 0) {
-            testLinkMain.Run(TestCaseName, _TCSUMMARY, this.isSuccess, this.errorMessage, stepResults, SuiteID);
+            testLinkMain.Run(TestCaseName, _TCSUMMARY, this.isSuccess, this.errorMessage, this.stepResults, this._SUITEID);
+        }
+    }
+
+    @AfterScenario(uponType = ScenarioType.EXAMPLE)
+    public void TestLinkIntegrationforExample() {
+        this.testOutcome = GetTestOutcome();
+
+        String TestCaseName =  this.testOutcome.getName();
+
+        //  Suite ID from scenario name with pattern '1234567'
+        this._SUITEID = ParseSuiteID(TestCaseName);
+
+        GetTestResultWithExample();
+        GetTestErrorMessage();
+
+        TestLinkMain testLinkMain = new TestLinkMain(TESTLINK_URL, TESTLINK_KEY);
+        testLinkMain.Init(_PROJECTNAME, _PROJECTID, _VERSION, _BUILDNAME, _PLANNAME, _USERNAME);
+        if(stepResults.size() > 0) {
+            testLinkMain.Run(TestCaseName, _TCSUMMARY, this.isSuccess, this.errorMessage, this.stepResults, this._SUITEID);
         }
     }
 
@@ -71,54 +79,62 @@ public class Base extends SerenityStory {
 
         TestOutcome testOutcome = testOutcomeList.get(testOutcomeList.size()-1);
 
-        errorMessage = "";
-        if(testOutcome.isFailure() || testOutcome.isError()) {
-            errorMessage = testOutcome.getErrorMessage();
-            System.out.println("DEBUG ERROR : " + testOutcome.getTestFailureCause().getMessage());
-            isSuccess = false;
-        }
-
         return testOutcome;
     }
 
-    private String GetTestCaseName() {
-        return this.testOutcome.getName();
+    private void GetTestErrorMessage() {
+        if(testOutcome.isFailure() || testOutcome.isError()) {
+            errorMessage = testOutcome.getErrorMessage();
+            isSuccess = false;
+        }
     }
 
-    private List<StepResult> GetTestResult() {
+    private void GetTestResultWithExample() {
+        Integer count_given = 0;
         List<TestStep> testStepList = this.testOutcome.getTestSteps();
-        List<StepResult> stepResults =  new ArrayList<StepResult>();
-
         for(TestStep testStep : testStepList) {
-
-            /*
-             * Kalo ga punya childern - pass
-             * Kalo punya children dan description ada pattern Example #\d+ - pass
-             * Kalo puunya children dan description ga punya pattern Example #\d+ - abort
-             */
-
             Boolean exampleStories = testStep.getDescription().toString().matches("(.*)Example #\\d+(.*)");
+
+            // GivenStories
+            if(testStep.getChildren().size() > 0 && !exampleStories && stepResults.size() == count_given) {
+                stepResults.clear();
+                StepResult stepResult = new StepResult();
+                stepResult.name = testStep.getDescription();
+                stepResult.status = testStep.isFailure() || testStep.isError() ? "Failed" : "Success";
+                stepResults.add(stepResult);
+                count_given++;
+            }
+
             if(testStep.getChildren().size() > 0 && exampleStories) {
                 // Jbehave scenario with examples
                 DataTable dataTable = this.testOutcome.getDataTable();
                 List<String> exampleFields = dataTable.getHeaders();
                 List<DataTableRow> exampleValuesRow = dataTable.getRows();
 
-                for (DataTableRow dataTableRow : exampleValuesRow) {
-                    List<String> values_temp = dataTableRow.getStringValues();
-                    for (String value : values_temp) {
-                        this.exampleValues.add(value.toString());
+                if (this.exampleValues.size() == 0) {
+                    for (DataTableRow dataTableRow : exampleValuesRow) {
+                        List<String> values_temp = dataTableRow.getStringValues();
+                        for (String value : values_temp) {
+                            this.exampleValues.add(value.toString());
+                        }
                     }
                 }
 
-                if(_TCSUMMARY == "") {
+                if(_TCSUMMARY == null) {
                     _TCSUMMARY += "fields = " + String.join(",", exampleFields) + "\n";
                     _TCSUMMARY += "values = " + String.join(",", this.exampleValues) + "\n";
                 }
 
-                if(stepResults.size() == 0) {
+                if(stepResults.size() == count_given) {
                     List<TestStep> childrenSteps = testStep.getChildren();
                     for (TestStep testStep1 : childrenSteps) {
+                        // String temp_name = testStep1.getDescription();
+                        // Pattern pattern = Pattern.compile("\\{(\\w+)\\}");
+                        // Matcher matcher = pattern.matcher(testStep1.getDescription());
+                        // if(matcher.find()) {
+                        //     temp_name = matcher.replaceAll("{field}");
+                        // }
+
                         StepResult stepResult = new StepResult();
                         stepResult.name = testStep1.getDescription();
                         stepResult.status = testStep1.isFailure() || testStep.isError() ? "Failed" : "Success";
@@ -126,21 +142,47 @@ public class Base extends SerenityStory {
                     }
                 }
             }
+        }
+    }
 
-            if(testStep.getChildren().size() == 0 && !exampleStories) {
-                _TCSUMMARY = this.testOutcome.getName();
+    private void GetTestResult() {
+        _TCSUMMARY = this.testOutcome.getName();
+        List<TestStep> testStepList = this.testOutcome.getTestSteps();
+
+        for(TestStep testStep : testStepList) {
+            Pattern pattern = Pattern.compile("^(Given|When|Then)");
+            Matcher matcher = pattern.matcher(testStep.getDescription());
+            Boolean storyStep = matcher.find();
+
+            if(testStep.getChildren().size() > 0 && !storyStep) {
+                stepResults.clear();
                 StepResult stepResult = new StepResult();
                 stepResult.name = testStep.getDescription();
                 stepResult.status = testStep.isFailure() || testStep.isError() ? "Failed" : "Success";
                 stepResults.add(stepResult);
             }
-        }
 
-        return stepResults;
+            if(testStep.getChildren().size() == 0) {
+                StepResult stepResult = new StepResult();
+                stepResult.name = testStep.getDescription();
+                stepResult.status = testStep.isFailure() || testStep.isError() ? "Failed" : "Success";
+                stepResults.add(stepResult);
+            }
+
+            if(testStep.getChildren().size() > 0 && storyStep) {
+                List<TestStep> childrenSteps = testStep.getChildren();
+                for (TestStep testStep1 : childrenSteps) {
+                    StepResult stepResult = new StepResult();
+                    stepResult.name = testStep1.getDescription();
+                    stepResult.status = testStep1.isFailure() || testStep.isError() ? "Failed" : "Success";
+                    stepResults.add(stepResult);
+                }
+            }
+        }
     }
 
     private Integer ParseSuiteID(String TestCaseName) {
-        Pattern pattern = Pattern.compile("'(\\d+)'");
+        Pattern pattern = Pattern.compile("(\\d+)");
         Matcher matcher = pattern.matcher(TestCaseName);
 
         if(matcher.find()) {
